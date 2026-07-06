@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Product Test</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        h1 { color: #2c1810; }
+        button {
+            background: #2c1810;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #8b5a3c; }
+        .status {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .product-count {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c1810;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Quick Product Test</h1>
+        
+        <div class="status">
+            <p><strong>Current Products in Storage:</strong></p>
+            <div class="product-count" id="count">Loading...</div>
+        </div>
+
+        <button onclick="addTestProduct()">➕ Add Test Product</button>
+        <button onclick="clearAll()">🗑️ Clear All</button>
+        <button onclick="checkStorage()">🔄 Refresh</button>
+        
+        <br><br>
+        
+        <button onclick="openAdmin()">🔐 Open Admin Panel</button>
+        <button onclick="openSite()">🌐 Open Live Site</button>
+
+        <div id="products" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function checkStorage() {
+            const products = localStorage.getItem('zarisProducts');
+            const count = document.getElementById('count');
+            const productsDiv = document.getElementById('products');
+            
+            if (!products || products === '[]') {
+                count.textContent = '0 products';
+                count.style.color = '#ef4444';
+                productsDiv.innerHTML = '<p style="color: #666;">No products in storage. Add one using the button above or admin panel.</p>';
+                return;
+            }
+
+            const list = JSON.parse(products);
+            count.textContent = list.length + ' products';
+            count.style.color = '#10b981';
+            
+            productsDiv.innerHTML = '<h3>Product List:</h3>';
+            list.forEach((p, i) => {
+                productsDiv.innerHTML += `<p><strong>${i+1}.</strong> ${p.name} - ₹${p.price}</p>`;
+            });
+        }
+
+        function addTestProduct() {
+            const products = localStorage.getItem('zarisProducts');
+            const list = products ? JSON.parse(products) : [];
+            
+            const newProduct = {
+                id: Date.now(),
+                name: 'Test Wallet ' + (list.length + 1),
+                description: 'Test product added at ' + new Date().toLocaleTimeString(),
+                price: Math.floor(Math.random() * 3000) + 1000,
+                image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=600'
+            };
+            
+            list.push(newProduct);
+            localStorage.setItem('zarisProducts', JSON.stringify(list));
+            alert('✅ Test product added! Check the live site in 2 seconds.');
+            checkStorage();
+        }
+
+        function clearAll() {
+            if (confirm('Clear all products?')) {
+                localStorage.removeItem('zarisProducts');
+                alert('🗑️ All products cleared!');
+                checkStorage();
+            }
+        }
+
+        function openAdmin() {
+            window.open('admin.html', '_blank');
+        }
+
+        function openSite() {
+            window.open('index.html', '_blank');
+        }
+
+        // Auto refresh every 2 seconds
+        setInterval(checkStorage, 2000);
+        checkStorage();
+    </script>
+</body>
+</html>

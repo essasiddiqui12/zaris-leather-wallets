@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zaris Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f5f5;
+        }
+
+        /* Login Page */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2c1810 0%, #8b5a3c 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h1 {
+            color: #2c1810;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .login-box p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #8b5a3c;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: #2c1810;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #8b5a3c;
+        }
+
+        .demo-info {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8f5f1;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .demo-info code {
+            background: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #8b5a3c;
+            font-weight: 600;
+        }
+
+        .error {
+            color: #ef4444;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        /* Admin Dashboard */
+        .admin-dashboard {
+            display: none;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2c1810;
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: #d4a574;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+
+        .admin-nav {
+            background: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-nav h1 {
+            font-size: 1.5rem;
+            color: #2c1810;
+        }
+
+        .admin-content {
+            padding: 2rem;
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        .logout-btn {
+            background: #8b5a3c;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .admin-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #2c1810;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .card h3 {
+            color: #2c1810;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .chart-placeholder {
+            padding: 2rem;
+            text-align: center;
+            background: #f8f5f1;
+            border-radius: 10px;
+        }
+
+        .chart-placeholder p {
+            font-size: 1.1rem;
+            margin: 0.5rem 0;
+        }
+
+        .btn-secondary {
+            background: #8b5a3c;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #8b5a3c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        table th {
+            background: #f8f5f1;
+            font-weight: 600;
+            color: #2c1810;
+        }
+
+        table tr:hover {
+            background: #f8f5f1;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .products-header h2 {
+            color: #2c1810;
+            font-size: 1.8rem;
+        }
+
+        .add-btn {
+            background: #2c1810;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .add-btn:hover {
+            background: #8b5a3c;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-admin-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        .product-admin-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-admin-info {
+            padding: 1.5rem;
+        }
+
+        .product-admin-info h3 {
+            color: #2c1810;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-admin-info p {
+            color: #666;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .product-admin-price {
+            font-size: 1.5rem;
+            color: #8b5a3c;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .edit-btn {
+            flex: 1;
+            background: #8b5a3c;
+            color: white;
+            border: none;
+            padding: 0.6rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .delete-btn {
+            flex: 1;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.6rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-header h2 {
+            color: #2c1810;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-form .form-group textarea {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            resize: vertical;
+        }
+
+        .modal-form .form-group textarea:focus {
+            outline: none;
+            border-color: #8b5a3c;
+        }
+
+        .image-preview {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 2000;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .view-site-btn {
+            background: #d4a574;
+            color: #2c1810;
+            text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-page">
+        <div class="login-box">
+            <h1>🔐 Admin Login</h1>
+            <p>Sign in to manage products</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div id="loginError" class="error">Invalid credentials</div>
+                <button type="submit" class="btn">Login</button>
+                <div class="demo-info">
+                    <p><strong>Demo Login:</strong></p>
+                    <p>Username: <code>admin</code></p>
+                    <p>Password: <code>zaris123</code></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="admin-dashboard">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ZARIS</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-page="dashboard">📊 Dashboard</a>
+                <a href="#" class="nav-link" data-page="products">📦 Products</a>
+                <a href="#" class="nav-link" data-page="orders">🛒 Orders</a>
+                <a href="#" class="nav-link" data-page="customers">👥 Customers</a>
+                <a href="#" class="nav-link" data-page="analytics">📈 Analytics</a>
+                <a href="#" class="nav-link" data-page="settings">⚙️ Settings</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <nav class="admin-nav">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div>
+                    <a href="index.html" target="_blank" class="view-site-btn">🌐 View Live Site</a>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+            </nav>
+
+            <div class="admin-content">
+                <!-- Dashboard Page -->
+                <div id="dashboardPage" class="page-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📦</div>
+                            <div>
+                                <h3 id="totalProducts">0</h3>
+                                <p>Total Products</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🛒</div>
+                            <div>
+                                <h3 id="totalOrders">0</h3>
+                                <p>Total Orders</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💰</div>
+                            <div>
+                                <h3 id="totalRevenue">$0</h3>
+                                <p>Total Revenue</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div>
+                                <h3 id="totalCustomers">0</h3>
+                                <p>Customers</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h3>Recent Orders</h3>
+                            <div id="recentOrders"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Top Products</h3>
+                            <div id="topProducts"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Page -->
+                <div id="productsPage" class="page-section">
+                    <div class="products-header">
+                        <h2>Products Management</h2>
+                        <div>
+                            <button id="exportProducts" class="btn-secondary">📥 Export</button>
+                            <button id="addProductBtn" class="add-btn">➕ Add Product</button>
+                        </div>
+                    </div>
+                    <div id="productsGrid" class="products-grid"></div>
+                </div>
+
+                <!-- Orders Page -->
+                <div id="ordersPage" class="page-section">
+                    <div class="products-header">
+                        <h2>Orders Management</h2>
+                        <button id="exportOrders" class="btn-secondary">📥 Export Orders</button>
+                    </div>
+                    <div class="card">
+                        <div id="ordersTable"></div>
+                    </div>
+                </div>
+
+                <!-- Customers Page -->
+                <div id="customersPage" class="page-section">
+                    <div class="products-header">
+                        <h2>Customer Management</h2>
+                        <button id="exportCustomers" class="btn-secondary">📥 Export Customers</button>
+                    </div>
+                    <div class="card">
+                        <div id="customersTable"></div>
+                    </div>
+                </div>
+
+                <!-- Analytics Page -->
+                <div id="analyticsPage" class="page-section">
+                    <h2>Sales Analytics</h2>
+                    <div class="analytics-grid">
+                        <div class="card">
+                            <h3>Revenue Overview</h3>
+                            <div id="revenueChart" class="chart-placeholder">
+                                <p>📊 Revenue: <strong id="analyticsRevenue">$0</strong></p>
+                                <p>📈 Growth: <strong id="analyticsGrowth">+0%</strong></p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>Best Selling Products</h3>
+                            <div id="bestSellers"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div id="settingsPage" class="page-section">
+                    <h2>Store Settings</h2>
+                    <div class="card">
+                        <form id="settingsForm">
+                            <div class="form-group">
+                                <label>Store Name</label>
+                                <input type="text" id="storeName" value="Zaris">
+                            </div>
+                            <div class="form-group">
+                                <label>Store Email</label>
+                                <input type="email" id="storeEmail" value="contact@zaris.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Store Phone</label>
+                                <input type="tel" id="storePhone" value="+1 234 567 8900">
+                            </div>
+                            <div class="form-group">
+                                <label>Currency</label>
+                                <select id="storeCurrency">
+                                    <option value="USD">USD ($)</option>
+                                    <option value="EUR">EUR (€)</option>
+                                    <option value="GBP">GBP (£)</option>
+                                    <option value="INR" selected>INR (₹)</option>
+                                    <option value="AUD">AUD (A$)</option>
+                                    <option value="CAD">CAD (C$)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tax Rate (%)</label>
+                                <input type="number" id="taxRate" value="0" step="0.1">
+                            </div>
+                            <button type="submit" class="btn">Save Settings</button>
+                        </form>
+                    </div>
+
+                    <div class="card" style="margin-top: 2rem;">
+                        <h3>Data Management</h3>
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                            <button id="clearAllData" class="delete-btn">🗑️ Clear All Data</button>
+                            <button id="resetDemo" class="btn-secondary">🔄 Reset Demo Data</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Product</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <form id="productForm" class="modal-form">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Product Name *</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea id="productDesc" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Price ($) *</label>
+                    <input type="number" id="productPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Product Image *</label>
+                    <input type="file" id="productImage" accept="image/*" required>
+                    <small style="color: #666; font-size: 0.85rem;">Upload JPG, PNG, or GIF (Max 5MB)</small>
+                </div>
+                <div class="image-preview">
+                    <img id="previewImg" style="display:none">
+                </div>
+                <button type="submit" class="btn">Save Product</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>

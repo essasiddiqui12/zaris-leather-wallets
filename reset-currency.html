@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Currency to INR</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2c1810 0%, #8b5a3c 100%);
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+        }
+        h1 {
+            color: #2c1810;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        button {
+            background: #2c1810;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #8b5a3c;
+        }
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+        }
+        .links {
+            margin-top: 2rem;
+        }
+        .links a {
+            color: #2c1810;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Reset to INR Currency</h1>
+        <p>Click the button below to reset your store currency to Indian Rupees (₹)</p>
+        
+        <button onclick="resetToINR()">Reset to INR (₹)</button>
+        <button onclick="clearAll()">Clear All Data</button>
+        
+        <div id="success" class="success"></div>
+        
+        <div class="links">
+            <a href="admin.html">Go to Admin Panel</a>
+            <a href="index.html">Go to Store</a>
+        </div>
+    </div>
+
+    <script>
+        function resetToINR() {
+            // Set settings to INR
+            const settings = {
+                storeName: 'Zaris',
+                storeEmail: 'contact@zaris.com',
+                storePhone: '+91 98765 43210',
+                currency: 'INR',
+                taxRate: 18
+            };
+            localStorage.setItem('zarisSettings', JSON.stringify(settings));
+            
+            // Update products to INR prices if they exist
+            const products = localStorage.getItem('zarisProducts');
+            if (products) {
+                const productsList = JSON.parse(products);
+                // Check if prices are in dollars (less than 500)
+                if (productsList.length > 0 && productsList[0].price < 500) {
+                    // Convert to INR (multiply by 28 approximately)
+                    productsList.forEach(product => {
+                        product.price = Math.round(product.price * 28);
+                    });
+                    localStorage.setItem('zarisProducts', JSON.stringify(productsList));
+                }
+            }
+            
+            showSuccess('✅ Currency reset to INR (₹) successfully! Prices updated.');
+        }
+        
+        function clearAll() {
+            if (confirm('This will clear ALL data. Are you sure?')) {
+                localStorage.removeItem('zarisProducts');
+                localStorage.removeItem('zarisOrders');
+                localStorage.removeItem('zarisCustomers');
+                localStorage.removeItem('zarisCart');
+                localStorage.removeItem('zarisSettings');
+                localStorage.removeItem('zarisAdminLoggedIn');
+                
+                showSuccess('🗑️ All data cleared! Please login to admin again.');
+            }
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

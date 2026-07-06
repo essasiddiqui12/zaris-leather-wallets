@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sync - Zaris</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2c1810; }
+        .product-list {
+            margin-top: 2rem;
+        }
+        .product {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .product img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        button {
+            background: #2c1810;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        button:hover { background: #8b5a3c; }
+        .info {
+            background: #e3f2fd;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .success {
+            background: #d1fae5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Product Sync Test</h1>
+        
+        <div class="info">
+            <p><strong>How to test:</strong></p>
+            <ol>
+                <li>Click "Refresh Products" to load from storage</li>
+                <li>Open Admin Panel in another tab</li>
+                <li>Add a product in Admin</li>
+                <li>Come back here and click "Refresh Products"</li>
+                <li>Your new product should appear!</li>
+            </ol>
+        </div>
+
+        <div>
+            <button onclick="refreshProducts()">🔄 Refresh Products</button>
+            <button onclick="clearProducts()">🗑️ Clear All Products</button>
+            <button onclick="window.open('admin.html')">🔐 Open Admin</button>
+            <button onclick="window.open('index.html')">🌐 Open Store</button>
+        </div>
+
+        <div class="success" id="successMsg"></div>
+
+        <div class="product-list">
+            <h2>Current Products (<span id="productCount">0</span>)</h2>
+            <div id="productsList"></div>
+        </div>
+    </div>
+
+    <script>
+        function refreshProducts() {
+            const products = localStorage.getItem('zarisProducts');
+            const productsList = document.getElementById('productsList');
+            const productCount = document.getElementById('productCount');
+            
+            if (!products) {
+                productsList.innerHTML = '<p style="color: #666;">No products found in storage.</p>';
+                productCount.textContent = '0';
+                return;
+            }
+
+            const productsArray = JSON.parse(products);
+            productCount.textContent = productsArray.length;
+
+            if (productsArray.length === 0) {
+                productsList.innerHTML = '<p style="color: #666;">No products yet. Add some in the admin panel!</p>';
+                return;
+            }
+
+            productsList.innerHTML = '';
+            productsArray.forEach(product => {
+                const div = document.createElement('div');
+                div.className = 'product';
+                div.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/100'">
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 0.5rem 0;">${product.name}</h3>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">${product.description}</p>
+                        <p style="margin: 0.5rem 0 0 0; color: #8b5a3c; font-weight: bold;">₹${product.price}</p>
+                    </div>
+                `;
+                productsList.appendChild(div);
+            });
+
+            showSuccess('✅ Products loaded successfully!');
+        }
+
+        function clearProducts() {
+            if (confirm('Clear all products? This will affect the live site!')) {
+                localStorage.removeItem('zarisProducts');
+                refreshProducts();
+                showSuccess('🗑️ All products cleared!');
+            }
+        }
+
+        function showSuccess(msg) {
+            const successDiv = document.getElementById('successMsg');
+            successDiv.textContent = msg;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Load on start
+        refreshProducts();
+
+        // Auto refresh every 3 seconds
+        setInterval(refreshProducts, 3000);
+    </script>
+</body>
+</html>
