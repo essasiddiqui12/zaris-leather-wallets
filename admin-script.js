@@ -79,7 +79,7 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
 });
 
 // Show Dashboard
-function showDashboard() {
+async function showDashboard() {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'flex';
     initializeData();
@@ -93,7 +93,7 @@ function showDashboard() {
         saveSettings(settings);
     }
     
-    loadDashboard();
+    await loadDashboard();
     setupNavigation();
 }
 
@@ -168,18 +168,27 @@ function switchPage(page) {
 // Get Data Functions
 async function getProducts() {
     try {
+        console.log('🔍 Admin: Fetching products from Supabase...');
         const { data, error } = await supabaseClient
             .from('products')
             .select('*')
             .order('created_at', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Admin: Supabase error:', error);
+            throw error;
+        }
+        
+        console.log('✅ Admin: Fetched products from Supabase:', data);
         return data || [];
     } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('❌ Admin: Error fetching products:', error);
+        console.log('⚠️ Admin: Falling back to localStorage...');
         // Fallback to localStorage
         const products = localStorage.getItem('zarisProducts');
-        return products ? JSON.parse(products) : [];
+        const parsed = products ? JSON.parse(products) : [];
+        console.log('✅ Admin: Loaded from localStorage:', parsed);
+        return parsed;
     }
 }
 
@@ -478,6 +487,8 @@ document.getElementById('productImage').addEventListener('change', (e) => {
 productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    console.log('📝 Admin: Form submitted');
+    
     const products = await getProducts();
     const editId = document.getElementById('editId').value;
     
@@ -493,27 +504,43 @@ productForm.addEventListener('submit', async (e) => {
         price: parseFloat(document.getElementById('productPrice').value),
         image: imageBase64 || (editId !== '' ? products[parseInt(editId)].image : '')
     };
+    
+    console.log('📦 Admin: Product data:', productData);
 
     try {
         if (editId !== '') {
             // Update existing product
             const product = products[parseInt(editId)];
-            const { data, error} = await supabaseClient
+            console.log('✏️ Admin: Updating product ID:', product.id);
+            
+            const { data, error } = await supabaseClient
                 .from('products')
                 .update(productData)
                 .eq('id', product.id)
                 .select();
             
-            if (error) throw error;
+            if (error) {
+                console.error('❌ Admin: Update error:', error);
+                throw error;
+            }
+            
+            console.log('✅ Admin: Product updated in Supabase:', data);
             showNotification('✅ Product updated successfully!');
         } else {
             // Add new product
+            console.log('➕ Admin: Adding new product to Supabase...');
+            
             const { data, error } = await supabaseClient
                 .from('products')
                 .insert([productData])
                 .select();
             
-            if (error) throw error;
+            if (error) {
+                console.error('❌ Admin: Insert error:', error);
+                throw error;
+            }
+            
+            console.log('✅ Admin: Product added to Supabase:', data);
             showNotification('✅ Product added successfully!');
         }
         
@@ -524,6 +551,7 @@ productForm.addEventListener('submit', async (e) => {
             products.push({ ...productData, id: Date.now() });
         }
         await saveProducts(products);
+        console.log('💾 Admin: Saved to localStorage as backup');
         
         await loadProducts();
         await loadDashboard();
@@ -531,9 +559,11 @@ productForm.addEventListener('submit', async (e) => {
         productForm.reset();
         imageBase64 = '';
         document.getElementById('previewImg').style.display = 'none';
+        
+        console.log('🎉 Admin: Product operation completed successfully');
     } catch (error) {
-        console.error('Error saving product:', error);
-        alert('Error saving product. Please try again.');
+        console.error('❌ Admin: Error saving product:', error);
+        alert('Error saving product: ' + error.message + '\n\nPlease check the console for details.');
     }
 });
 

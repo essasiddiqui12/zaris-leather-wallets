@@ -71,22 +71,35 @@ function formatCurrency(amount) {
 // Get products from Supabase or use defaults
 async function getProducts() {
     try {
+        console.log('🔍 Fetching products from Supabase...');
         const { data, error } = await supabaseClient
             .from('products')
             .select('*')
             .order('created_at', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Supabase error:', error);
+            throw error;
+        }
         
+        console.log('✅ Fetched products from Supabase:', data);
         // If no products in database, return defaults
-        return data && data.length > 0 ? data : defaultProducts;
+        if (!data || data.length === 0) {
+            console.log('⚠️ No products in database, using defaults');
+            return defaultProducts;
+        }
+        return data;
     } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('❌ Error fetching products:', error);
+        console.log('⚠️ Falling back to localStorage...');
         // Fallback to localStorage if Supabase fails
         const savedProducts = localStorage.getItem('zarisProducts');
         if (savedProducts) {
-            return JSON.parse(savedProducts);
+            const products = JSON.parse(savedProducts);
+            console.log('✅ Loaded products from localStorage:', products);
+            return products;
         }
+        console.log('⚠️ No localStorage data, using defaults');
         return defaultProducts;
     }
 }
@@ -100,8 +113,8 @@ async function loadProducts() {
 }
 
 // Reload products function
-function reloadProducts() {
-    products = getProducts();
+async function reloadProducts() {
+    products = await getProducts();
     renderProducts();
 }
 

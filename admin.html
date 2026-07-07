@@ -6,8 +6,14 @@
     <title>Zaris Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <script>
+        // Initialize Supabase client inline to ensure it loads
+        const SUPABASE_URL = 'https://amxnphzlplxljtrrirnu.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteG5waHpscGx4bGp0cnJpcm51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMzk2NTUsImV4cCI6MjA5ODgxNTY1NX0.TQJwZSTrY-055mbgUSzAnjEoHXurleg0hUmKW9aHeQ8';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Admin: Supabase client initialized:', supabaseClient);
+    </script>
     <style>
         * {
             margin: 0;
