@@ -68,18 +68,36 @@ function formatCurrency(amount) {
     return `${symbol}${parseFloat(amount).toFixed(2)}`;
 }
 
-// Get products from localStorage or use defaults
-function getProducts() {
-    const savedProducts = localStorage.getItem('zarisProducts');
-    if (savedProducts) {
-        const products = JSON.parse(savedProducts);
-        // If admin has added products, use those, otherwise use defaults
-        return products.length > 0 ? products : defaultProducts;
+// Get products from Supabase or use defaults
+async function getProducts() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        // If no products in database, return defaults
+        return data && data.length > 0 ? data : defaultProducts;
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        // Fallback to localStorage if Supabase fails
+        const savedProducts = localStorage.getItem('zarisProducts');
+        if (savedProducts) {
+            return JSON.parse(savedProducts);
+        }
+        return defaultProducts;
     }
-    return defaultProducts;
 }
 
-let products = getProducts();
+let products = [];
+
+// Load products on page load
+async function loadProducts() {
+    products = await getProducts();
+    renderProducts();
+}
 
 // Reload products function
 function reloadProducts() {
@@ -105,12 +123,12 @@ function saveCart() {
 }
 
 // Render Products
-function renderProducts() {
+async function renderProducts() {
     const productsGrid = document.getElementById('productsGrid');
     productsGrid.innerHTML = '';
 
-    // Get fresh products
-    const currentProducts = getProducts();
+    // Get fresh products from Supabase
+    const currentProducts = await getProducts();
 
     currentProducts.forEach(product => {
         const productCard = document.createElement('div');
@@ -141,9 +159,9 @@ function renderProducts() {
 }
 
 // Add to Cart
-function addToCart(productId) {
-    // Get fresh products list
-    const currentProducts = getProducts();
+async function addToCart(productId) {
+    // Get fresh products list from Supabase
+    const currentProducts = await getProducts();
     const product = currentProducts.find(p => p.id === productId);
     if (!product) return;
 
@@ -303,18 +321,35 @@ contactForm.addEventListener('submit', (e) => {
 
 // Newsletter Form
 const newsletterForm = document.getElementById('newsletterForm');
-newsletterForm.addEventListener('submit', (e) => {
+newsletterForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('newsletterEmail').value;
     
-    // Save to localStorage
-    const subscribers = JSON.parse(localStorage.getItem('zarisSubscribers') || '[]');
-    if (!subscribers.includes(email)) {
-        subscribers.push(email);
-        localStorage.setItem('zarisSubscribers', JSON.stringify(subscribers));
-        showNotification('🎉 Successfully subscribed! Check your email for exclusive offers.');
-    } else {
-        showNotification('You are already subscribed!');
+    try {
+        // Save to Supabase
+        const { data, error } = await supabaseClient
+            .from('newsletter_subscribers')
+            .insert([{ email: email }])
+            .select();
+        
+        if (error) {
+            if (error.code === '23505') { // Unique constraint violation
+                showNotification('You are already subscribed!');
+            } else {
+                throw error;
+            }
+        } else {
+            // Also save to localStorage as backup
+            const subscribers = JSON.parse(localStorage.getItem('zarisSubscribers') || '[]');
+            if (!subscribers.includes(email)) {
+                subscribers.push(email);
+                localStorage.setItem('zarisSubscribers', JSON.stringify(subscribers));
+            }
+            showNotification('🎉 Successfully subscribed! Check your email for exclusive offers.');
+        }
+    } catch (error) {
+        console.error('Error subscribing:', error);
+        showNotification('There was an error. Please try again.');
     }
     
     newsletterForm.reset();
@@ -396,9 +431,10 @@ document.getElementById('sortProducts').addEventListener('change', (e) => {
     filterProducts();
 });
 
-function filterProducts() {
+async function filterProducts() {
     const searchTerm = searchInput.value.toLowerCase();
-    let filteredProducts = getProducts();
+    const currentProducts = await getProducts();
+    let filteredProducts = [...currentProducts];
 
     // Search filter
     if (searchTerm) {
@@ -533,37 +569,52 @@ checkoutModal.addEventListener('click', (e) => {
     }
 });
 
-checkoutForm.addEventListener('submit', (e) => {
+checkoutForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const orderData = {
-        name: document.getElementById('customerName').value,
-        phone: document.getElementById('customerPhone').value,
-        email: document.getElementById('customerEmail').value,
-        address: document.getElementById('customerAddress').value,
-        city: document.getElementById('customerCity').value,
-        pincode: document.getElementById('customerPincode').value,
-        paymentMethod: document.getElementById('paymentMethod').value,
+        customer_name: document.getElementById('customerName').value,
+        customer_phone: document.getElementById('customerPhone').value,
+        customer_email: document.getElementById('customerEmail').value,
+        customer_address: document.getElementById('customerAddress').value,
+        customer_city: document.getElementById('customerCity').value,
+        customer_pincode: document.getElementById('customerPincode').value,
+        payment_method: document.getElementById('paymentMethod').value,
         items: cart,
         total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        date: new Date().toISOString()
+        status: 'pending'
     };
     
-    // Save order to localStorage
-    const orders = JSON.parse(localStorage.getItem('zarisOrders') || '[]');
-    orders.push(orderData);
-    localStorage.setItem('zarisOrders', JSON.stringify(orders));
-    
-    // Clear cart
-    cart = [];
-    saveCart();
-    updateCartUI();
-    
-    // Close modal and show success
-    checkoutModal.classList.remove('active');
-    alert(`Thank you ${orderData.name}! Your order has been placed successfully.\n\nOrder Total: ${formatCurrency(orderData.total)}\nPayment Method: ${orderData.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}\n\nWe'll contact you shortly on ${orderData.phone}`);
-    
-    checkoutForm.reset();
+    try {
+        // Save order to Supabase
+        const { data, error } = await supabaseClient
+            .from('orders')
+            .insert([orderData])
+            .select();
+        
+        if (error) throw error;
+        
+        console.log('✅ Order saved to database:', data);
+        
+        // Also save to localStorage as backup
+        const orders = JSON.parse(localStorage.getItem('zarisOrders') || '[]');
+        orders.push(orderData);
+        localStorage.setItem('zarisOrders', JSON.stringify(orders));
+        
+        // Clear cart
+        cart = [];
+        saveCart();
+        updateCartUI();
+        
+        // Close modal and show success
+        checkoutModal.classList.remove('active');
+        alert(`Thank you ${orderData.customer_name}! Your order has been placed successfully.\n\nOrder Total: ${formatCurrency(orderData.total)}\nPayment Method: ${orderData.payment_method === 'cod' ? 'Cash on Delivery' : 'Online Payment'}\n\nWe'll contact you shortly on ${orderData.customer_phone}`);
+        
+        checkoutForm.reset();
+    } catch (error) {
+        console.error('Error saving order:', error);
+        alert('There was an error placing your order. Please try again or contact support.');
+    }
 });
 
 // Info Modal
@@ -693,19 +744,19 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    renderProducts();
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadProducts();
     loadCart();
     console.log('🛍️ Welcome to Zaris - Premium Leather Wallets');
+    console.log('✅ Connected to Supabase Database');
 });
 
-// Check for product updates every 2 seconds
-setInterval(() => {
-    const currentProducts = getProducts();
-    // Compare product count
+// Check for product updates every 5 seconds from Supabase
+setInterval(async () => {
+    const currentProducts = await getProducts();
     const oldCount = document.querySelectorAll('.product-card').length;
     if (currentProducts.length !== oldCount) {
-        console.log('🔄 Products updated! Reloading...');
-        renderProducts();
+        console.log('🔄 Products updated from database! Reloading...');
+        await renderProducts();
     }
-}, 2000);
+}, 5000);

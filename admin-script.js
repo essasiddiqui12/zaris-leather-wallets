@@ -166,9 +166,21 @@ function switchPage(page) {
 }
 
 // Get Data Functions
-function getProducts() {
-    const products = localStorage.getItem('zarisProducts');
-    return products ? JSON.parse(products) : [];
+async function getProducts() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        return data || [];
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        // Fallback to localStorage
+        const products = localStorage.getItem('zarisProducts');
+        return products ? JSON.parse(products) : [];
+    }
 }
 
 function getOrders() {
@@ -187,8 +199,15 @@ function getSettings() {
 }
 
 // Save Data Functions
-function saveProducts(products) {
-    localStorage.setItem('zarisProducts', JSON.stringify(products));
+async function saveProducts(products) {
+    try {
+        // For now, we'll handle individual operations (add/update/delete)
+        // This function is kept for compatibility
+        localStorage.setItem('zarisProducts', JSON.stringify(products));
+        console.log('Products saved to localStorage as backup');
+    } catch (error) {
+        console.error('Error saving products:', error);
+    }
 }
 
 function saveOrders(orders) {
@@ -204,8 +223,8 @@ function saveSettings(settings) {
 }
 
 // Load Dashboard
-function loadDashboard() {
-    const products = getProducts();
+async function loadDashboard() {
+    const products = await getProducts();
     const orders = getOrders();
     const customers = getCustomers();
     
@@ -250,8 +269,8 @@ function loadDashboard() {
 }
 
 // Load Products
-function loadProducts() {
-    const products = getProducts();
+async function loadProducts() {
+    const products = await getProducts();
     const grid = document.getElementById('productsGrid');
     grid.innerHTML = '';
 
@@ -456,10 +475,10 @@ document.getElementById('productImage').addEventListener('change', (e) => {
 });
 
 // Product Form Submit
-productForm.addEventListener('submit', (e) => {
+productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const products = getProducts();
+    const products = await getProducts();
     const editId = document.getElementById('editId').value;
     
     // Check if image is uploaded (for new products) or exists (for edits)
@@ -468,34 +487,59 @@ productForm.addEventListener('submit', (e) => {
         return;
     }
     
-    const product = {
-        id: editId ? parseInt(editId) : Date.now(),
+    const productData = {
         name: document.getElementById('productName').value,
         description: document.getElementById('productDesc').value,
         price: parseFloat(document.getElementById('productPrice').value),
         image: imageBase64 || (editId !== '' ? products[parseInt(editId)].image : '')
     };
 
-    if (editId !== '') {
-        products[parseInt(editId)] = product;
-        showNotification('✅ Product updated successfully!');
-    } else {
-        products.push(product);
-        showNotification('✅ Product added successfully!');
+    try {
+        if (editId !== '') {
+            // Update existing product
+            const product = products[parseInt(editId)];
+            const { data, error} = await supabaseClient
+                .from('products')
+                .update(productData)
+                .eq('id', product.id)
+                .select();
+            
+            if (error) throw error;
+            showNotification('✅ Product updated successfully!');
+        } else {
+            // Add new product
+            const { data, error } = await supabaseClient
+                .from('products')
+                .insert([productData])
+                .select();
+            
+            if (error) throw error;
+            showNotification('✅ Product added successfully!');
+        }
+        
+        // Also save to localStorage as backup
+        if (editId !== '') {
+            products[parseInt(editId)] = { ...productData, id: products[parseInt(editId)].id };
+        } else {
+            products.push({ ...productData, id: Date.now() });
+        }
+        await saveProducts(products);
+        
+        await loadProducts();
+        await loadDashboard();
+        modal.classList.remove('active');
+        productForm.reset();
+        imageBase64 = '';
+        document.getElementById('previewImg').style.display = 'none';
+    } catch (error) {
+        console.error('Error saving product:', error);
+        alert('Error saving product. Please try again.');
     }
-
-    saveProducts(products);
-    loadProducts();
-    loadDashboard();
-    modal.classList.remove('active');
-    productForm.reset();
-    imageBase64 = '';
-    document.getElementById('previewImg').style.display = 'none';
 });
 
 // Edit Product
-function editProduct(index) {
-    const products = getProducts();
+async function editProduct(index) {
+    const products = await getProducts();
     const product = products[index];
     
     document.getElementById('modalTitle').textContent = 'Edit Product';
@@ -518,15 +562,32 @@ function editProduct(index) {
 }
 
 // Delete Product
-function deleteProduct(index) {
+async function deleteProduct(index) {
     if (!confirm('⚠️ Are you sure you want to delete this product? This action cannot be undone.')) return;
     
-    const products = getProducts();
-    products.splice(index, 1);
-    saveProducts(products);
-    loadProducts();
-    loadDashboard();
-    showNotification('🗑️ Product deleted successfully!');
+    try {
+        const products = await getProducts();
+        const product = products[index];
+        
+        // Delete from Supabase
+        const { error } = await supabaseClient
+            .from('products')
+            .delete()
+            .eq('id', product.id);
+        
+        if (error) throw error;
+        
+        // Also delete from localStorage backup
+        products.splice(index, 1);
+        await saveProducts(products);
+        
+        await loadProducts();
+        await loadDashboard();
+        showNotification('🗑️ Product deleted successfully!');
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Error deleting product. Please try again.');
+    }
 }
 
 // View Order
