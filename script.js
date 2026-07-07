@@ -128,6 +128,14 @@ function renderProducts() {
                 </div>
             </div>
         `;
+        
+        // Add click event to image for lightbox
+        const img = productCard.querySelector('.product-image');
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', () => {
+            openLightbox(product.image, product.name);
+        });
+        
         productsGrid.appendChild(productCard);
     });
 }
@@ -293,6 +301,25 @@ contactForm.addEventListener('submit', (e) => {
     contactForm.reset();
 });
 
+// Newsletter Form
+const newsletterForm = document.getElementById('newsletterForm');
+newsletterForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('newsletterEmail').value;
+    
+    // Save to localStorage
+    const subscribers = JSON.parse(localStorage.getItem('zarisSubscribers') || '[]');
+    if (!subscribers.includes(email)) {
+        subscribers.push(email);
+        localStorage.setItem('zarisSubscribers', JSON.stringify(subscribers));
+        showNotification('🎉 Successfully subscribed! Check your email for exclusive offers.');
+    } else {
+        showNotification('You are already subscribed!');
+    }
+    
+    newsletterForm.reset();
+});
+
 // Navbar Scroll Effect
 let lastScroll = 0;
 const navbar = document.querySelector('.navbar');
@@ -309,6 +336,24 @@ window.addEventListener('scroll', () => {
     }
     
     lastScroll = currentScroll;
+});
+
+// Back to Top Button
+const backToTopBtn = document.getElementById('backToTop');
+
+window.addEventListener('scroll', () => {
+    if (window.pageYOffset > 300) {
+        backToTopBtn.classList.add('visible');
+    } else {
+        backToTopBtn.classList.remove('visible');
+    }
+});
+
+backToTopBtn.addEventListener('click', () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
 });
 
 // Search Functionality
@@ -392,7 +437,7 @@ function filterProducts() {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         productCard.innerHTML = `
-            <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+            <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'" data-name="${product.name}">
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-description">${product.description}</p>
@@ -404,6 +449,14 @@ function filterProducts() {
                 </div>
             </div>
         `;
+        
+        // Add click event to image for lightbox
+        const img = productCard.querySelector('.product-image');
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', () => {
+            openLightbox(product.image, product.name);
+        });
+        
         productsGrid.appendChild(productCard);
     });
 }
@@ -605,6 +658,39 @@ function openModal(type) {
 
 // Make openModal globally accessible
 window.openModal = openModal;
+
+// Lightbox functionality
+const lightboxModal = document.getElementById('lightboxModal');
+const lightboxImage = document.getElementById('lightboxImage');
+const lightboxCaption = document.getElementById('lightboxCaption');
+const closeLightbox = document.getElementById('closeLightbox');
+
+function openLightbox(imageSrc, caption) {
+    lightboxImage.src = imageSrc;
+    lightboxCaption.textContent = caption;
+    lightboxModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+closeLightbox.addEventListener('click', () => {
+    lightboxModal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+});
+
+lightboxModal.addEventListener('click', (e) => {
+    if (e.target === lightboxModal) {
+        lightboxModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+});
+
+// Close lightbox with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightboxModal.classList.contains('active')) {
+        lightboxModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+});
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {

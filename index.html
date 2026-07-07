@@ -3,7 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaris - Premium Leather Wallets</title>
+    <title>Zaris - Premium Leather Wallets | Handcrafted in India</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Shop premium handcrafted leather wallets at Zaris. Discover bifold, minimalist, and cardholder designs. Free shipping on orders above ₹2000. Cash on Delivery available across India.">
+    <meta name="keywords" content="leather wallets, premium wallets, handcrafted wallets, bifold wallet, minimalist wallet, card holder, genuine leather, Zaris, India">
+    <meta name="author" content="Zaris">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zaris-leather.vercel.app/">
+    <meta property="og:title" content="Zaris - Premium Leather Wallets | Handcrafted in India">
+    <meta property="og:description" content="Shop premium handcrafted leather wallets. Discover bifold, minimalist, and cardholder designs. Free shipping on orders above ₹2000.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1608666636577-3b881838b08b?w=1200">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://zaris-leather.vercel.app/">
+    <meta property="twitter:title" content="Zaris - Premium Leather Wallets | Handcrafted in India">
+    <meta property="twitter:description" content="Shop premium handcrafted leather wallets. Discover bifold, minimalist, and cardholder designs. Free shipping on orders above ₹2000.">
+    <meta property="twitter:image" content="https://images.unsplash.com/photo-1608666636577-3b881838b08b?w=1200">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👛</text></svg>">
+    
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
@@ -20,7 +44,7 @@
                 <li><a href="#contact" class="nav-link">Contact</a></li>
             </ul>
             <div class="nav-actions">
-                <button class="search-btn" id="searchBtn" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: white; margin-right: 0.5rem;">🔍</button>
+                <button class="search-btn" id="searchBtn" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--primary); margin-right: 0.5rem;">🔍</button>
                 <button class="cart-btn" id="cartBtn">
                     🛒 <span class="cart-count" id="cartCount">0</span>
                 </button>
@@ -104,6 +128,64 @@
         </div>
     </section>
 
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials-section">
+        <div class="container">
+            <h2 class="section-title">What Our Customers Say</h2>
+            <p class="section-subtitle">Trusted by thousands of satisfied customers across India</p>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Best wallet I've ever owned! The leather quality is exceptional and it's aging beautifully. Worth every rupee!"</p>
+                    <div class="testimonial-author">
+                        <strong>Rahul Sharma</strong>
+                        <span>Mumbai</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Minimalist design, maximum functionality. Perfect for daily use. Delivered quickly and customer service was excellent!"</p>
+                    <div class="testimonial-author">
+                        <strong>Priya Patel</strong>
+                        <span>Delhi</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Gifted this to my husband and he absolutely loves it. Handcrafted quality shows in every detail. Highly recommended!"</p>
+                    <div class="testimonial-author">
+                        <strong>Ananya Reddy</strong>
+                        <span>Bangalore</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Switched from a branded wallet to Zaris and never looked back. Better quality at a better price. True craftsmanship!"</p>
+                    <div class="testimonial-author">
+                        <strong>Vikram Singh</strong>
+                        <span>Jaipur</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Compact, stylish, and durable. Using it for 6 months now and it still looks brand new. Excellent investment!"</p>
+                    <div class="testimonial-author">
+                        <strong>Meera Joshi</strong>
+                        <span>Pune</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Premium quality at affordable prices. The craftsmanship is outstanding. Will definitely buy again for friends and family!"</p>
+                    <div class="testimonial-author">
+                        <strong>Arjun Mehta</strong>
+                        <span>Chennai</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- FAQ Section -->
     <section id="faq" class="faq-section">
         <div class="container">
@@ -178,6 +260,18 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
+            <!-- Newsletter Section -->
+            <div class="newsletter-section">
+                <div class="newsletter-content">
+                    <h3>📬 Join Our Newsletter</h3>
+                    <p>Get exclusive offers, new arrivals, and leather care tips delivered to your inbox!</p>
+                </div>
+                <form class="newsletter-form" id="newsletterForm">
+                    <input type="email" id="newsletterEmail" placeholder="Enter your email address" required>
+                    <button type="submit" class="btn btn-primary">Subscribe</button>
+                </form>
+            </div>
+            
             <div class="footer-content">
                 <div class="footer-col">
                     <h3>ZARIS</h3>
@@ -222,6 +316,11 @@
             </div>
         </div>
     </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" title="Back to top">
+        ↑
+    </button>
 
     <!-- Shopping Cart Modal -->
     <div class="cart-modal" id="cartModal">
@@ -306,6 +405,15 @@
             <div class="cart-items" id="infoModalContent">
                 <!-- Content will be loaded here -->
             </div>
+        </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div class="lightbox-modal" id="lightboxModal">
+        <button class="lightbox-close" id="closeLightbox">×</button>
+        <div class="lightbox-content">
+            <img src="" alt="Product Image" id="lightboxImage">
+            <div class="lightbox-caption" id="lightboxCaption"></div>
         </div>
     </div>
 
